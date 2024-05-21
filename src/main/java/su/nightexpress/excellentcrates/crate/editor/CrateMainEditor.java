@@ -31,9 +31,9 @@ public class CrateMainEditor extends EditorMenu<CratesPlugin, Crate> implements 
     private static final String TEXTURE_MILESTONES = "d194a22345d9cdde75168299ad61873bc105e3ae73cd6c9ac02a285291ad0f1b";
 
     public CrateMainEditor(@NotNull CratesPlugin plugin) {
-        super(plugin, Lang.EDITOR_TITLE_CRATES.getString(), 54);
+        super(plugin, Lang.EDITOR_TITLE_CRATES.getString(), 36);
 
-        this.addReturn(49, (viewer, event, crate) -> {
+        this.addReturn(31, (viewer, event, crate) -> {
             this.runNextTick(() -> this.plugin.getCrateManager().openCratesEditor(viewer.getPlayer()));
         });
 
@@ -99,89 +99,12 @@ public class CrateMainEditor extends EditorMenu<CratesPlugin, Crate> implements 
             }
         });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_KEYS), EditorLang.CRATE_KEY_REQUIREMENT, 19, (viewer, event, crate) -> {
-            if (event.isLeftClick()) {
-                this.handleInput(viewer, Lang.EDITOR_ENTER_KEY_ID, (dialog, wrapper) -> {
-                    CrateKey key = this.plugin.getKeyManager().getKeyById(wrapper.getTextRaw());
-                    if (key != null) {
-                        crate.addKey(key);
-                        this.saveSettings(viewer, crate, false);
-                    }
-                    return true;
-                }).setSuggestions(plugin.getKeyManager().getKeyIds(), true);
-            }
-            else if (event.isRightClick()) {
-                crate.setKeys(new HashSet<>());
-                this.saveSettings(viewer, crate, true);
-            }
-            else if (event.getClick() == ClickType.DROP) {
-                crate.setKeyRequired(!crate.isKeyRequired());
-                this.saveSettings(viewer, crate, true);
-            }
-        });
-
-        this.addItem(Material.REDSTONE, EditorLang.CRATE_PERMISSION_REQUIREMENT, 21, (viewer, event, crate) -> {
-            crate.setPermissionRequired(!crate.isPermissionRequired());
-            this.saveSettings(viewer, crate, true);
-        }).getOptions().addDisplayModifier((viewer, item) -> {
-            if (!this.getObject(viewer).isPermissionRequired()) item.setType(Material.GUNPOWDER);
-        });
-
-        this.addItem(Material.CLOCK, EditorLang.CRATE_OPEN_COOLDOWN, 23, (viewer, event, crate) -> {
-            if (event.getClick() == ClickType.DROP) {
-                crate.setOpenCooldown(-1);
-                this.saveSettings(viewer, crate, true);
-                return;
-            }
-            if (event.isRightClick()) {
-                crate.setOpenCooldown(0);
-                this.saveSettings(viewer, crate, true);
-                return;
-            }
-            this.handleInput(viewer, Lang.EDITOR_ENTER_SECONDS, (dialog, wrapper) -> {
-                crate.setOpenCooldown(wrapper.asAnyInt(0));
-                this.saveSettings(viewer, crate, false);
-                return true;
-            });
-        });
-
-        this.addItem(Material.GOLD_INGOT, EditorLang.CRATE_OPEN_COST, 25, (viewer, event, crate) -> {
-            if (event.getClick() == ClickType.DROP) {
-                crate.getOpenCostMap().clear();
-                this.saveSettings(viewer, crate, true);
-                return;
-            }
-
-            this.handleInput(viewer, Lang.EDITOR_ENTER_OPEN_COST, (dialog, wrapper) -> {
-                String[] split = wrapper.getTextRaw().split(" ");
-
-                Currency currency = plugin.getCurrencyManager().getCurrency(split[0]);
-                if (currency == null) return true;
-
-                double amount = split.length >= 2 ? NumberUtil.getDouble(split[1], 0D) : 0D;
-
-                crate.setOpenCost(currency, amount);
-                this.saveSettings(viewer, crate, false);
-                return true;
-            }).setSuggestions(plugin.getCurrencyManager().getCurrencyIds(), false);
-        });
-
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_PLACEMENT), EditorLang.CRATE_PLACEMENT_INFO, 38, (viewer, event, crate) -> {
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_PLACEMENT), EditorLang.CRATE_PLACEMENT_INFO, 12, (viewer, event, crate) -> {
             this.runNextTick(() -> this.plugin.getCrateManager().openPlacementEditor(viewer.getPlayer(), crate));
         });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_REWARDS), EditorLang.CRATE_REWARDS, 40, (viewer, event, crate) -> {
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_REWARDS), EditorLang.CRATE_REWARDS, 14, (viewer, event, crate) -> {
             this.runNextTick(() -> this.plugin.getCrateManager().openRewardsEditor(viewer.getPlayer(), crate));
-        });
-
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_MILESTONES), EditorLang.CRATE_MILESTONES, 42, (viewer, event, crate) -> {
-            if (event.isRightClick()) {
-                crate.setMilestonesRepeatable(!crate.isMilestonesRepeatable());
-                this.saveMilestones(viewer, crate, true);
-                return;
-            }
-
-            this.runNextTick(() -> this.plugin.getCrateManager().openMilestonesEditor(viewer.getPlayer(), crate));
         });
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {

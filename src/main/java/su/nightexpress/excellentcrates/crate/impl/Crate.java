@@ -59,6 +59,8 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     private UniParticle effectParticle;
     private String      lastOpener;
     private String      lastReward;
+    private int         minRewardAmount;
+    private int         maxRewardAmount;
 
     public Crate(@NotNull CratesPlugin plugin, @NotNull File file) {
         super(plugin, file);
@@ -133,6 +135,8 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
         this.setLastOpener(config.getString("Last_Opener"));
         this.setLastReward(config.getString("Last_Reward"));
+        this.setMinRewardAmount(config.getInt("Rewards.Amount.Min", 1));
+        this.setMaxRewardAmount(config.getInt("Rewards.Amount.Max", 1));
 
         for (String sId : config.getSection("Rewards.List")) {
             Reward reward = Reward.read(this.plugin, this, config, "Rewards.List." + sId, sId);
@@ -151,6 +155,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     protected void onSave(@NotNull FileConfig config) {
         this.writeSettings(config);
         this.writeLastOpenData(config);
+        this.writeMinMaxRewards(config);
         this.writeRewards(config);
         this.writeMilestones(config);
     }
@@ -186,6 +191,11 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
         config.set("Last_Reward", this.getLastReward());
     }
 
+    private void writeMinMaxRewards(@NotNull FileConfig config) {
+        config.set("Rewards.Amount.Min", minRewardAmount);
+        config.set("Rewards.Amount.Max", maxRewardAmount);
+    }
+
     private void writeRewards(@NotNull FileConfig config) {
         config.remove("Rewards.List");
         this.rewardMap.forEach((id, reward) -> {
@@ -208,6 +218,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
     public void saveRewards() {
         this.saveSection(this::writeRewards);
+        this.saveSection(this::writeMinMaxRewards);
     }
 
     public void saveMilestones() {
@@ -589,6 +600,22 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
     public void setLastReward(@Nullable String lastReward) {
         this.lastReward = lastReward;
+    }
+
+    public int getMinRewardAmount() {
+        return minRewardAmount;
+    }
+
+    public void setMinRewardAmount(int minRewardAmount) {
+        this.minRewardAmount = minRewardAmount;
+    }
+
+    public int getMaxRewardAmount() {
+        return maxRewardAmount;
+    }
+
+    public void setMaxRewardAmount(int maxRewardAmount) {
+        this.maxRewardAmount = maxRewardAmount;
     }
 
     @NotNull

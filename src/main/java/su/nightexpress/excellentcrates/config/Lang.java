@@ -272,6 +272,9 @@ public class Lang extends CoreLang {
     public static final LangText ERROR_INVALID_MENU = LangText.of("Menu.Invalid",
         LIGHT_RED.enclose("Menu does not exist!"));
 
+    public static final LangString ERROR_INVALID_AMOUNT = LangString.of("Editor.Reward.Error.Invalid.Amount",
+            LIGHT_GRAY.enclose("Invalid reward amount! Please provide min and max amount (integers)."));
+
 
     public static final LangString OTHER_MIDNIGHT = LangString.of("Other.Midnight", "Midnight");
 
@@ -331,4 +334,7 @@ public class Lang extends CoreLang {
 
     public static final LangString EDITOR_ENTER_PERMISSION = LangString.of("Editor.Reward.Enter.Permissions",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Permission Node]")));
+
+    public static final LangString EDITOR_ENTER_REWARD_AMOUNT = LangString.of("Editor.Reward.Enter.Amount",
+            LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Min] [Max]")));
 }

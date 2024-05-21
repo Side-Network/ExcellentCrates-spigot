@@ -4,12 +4,15 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.excellentcrates.CratesPlugin;
+import su.nightexpress.excellentcrates.api.event.CrateObtainRewardEvent;
 import su.nightexpress.excellentcrates.config.Keys;
 import su.nightexpress.excellentcrates.Placeholders;
 import su.nightexpress.excellentcrates.api.currency.Currency;
@@ -41,6 +44,7 @@ import su.nightexpress.nightcore.util.wrapper.UniParticle;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CrateManager extends AbstractManager<CratesPlugin> {
 
@@ -60,6 +64,9 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
     private RewardMainEditor      rewardSettingsEditor;
     private RewardSortEditor      rewardSortEditor;
 
+    // Part of the falling crate logic taken from https://github.com/Artillex-Studios/AxEnvoys
+    private final ConcurrentLinkedQueue<FallingCrate> fallingCrates = new ConcurrentLinkedQueue<>();
+
     public CrateManager(@NotNull CratesPlugin plugin) {
         super(plugin);
         this.rarityMap = new HashMap<>();
@@ -78,8 +85,6 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         this.loadPreviews();
         this.loadCrates();
-
-
 
         this.editorMenu = new CratesEditorMenu(this.plugin);
         this.cratesEditor = new CrateListEditor(this.plugin, this);
@@ -101,6 +106,33 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         this.addTask(plugin.createTask(() -> BasicOpening.tickVisuals(this.plugin)).setSecondsInterval(1));
 
         this.addListener(new CrateListener(this.plugin, this));
+
+        // Fallen crate timer
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Iterator<FallingCrate> crateIterator = fallingCrates.iterator();
+
+                while (crateIterator.hasNext()) {
+                    FallingCrate next = crateIterator.next();
+                    Entity falling = next.getFalling();
+                    Entity vex = next.getVex();
+                    if (falling == null || vex == null)
+                        continue;
+
+                    Location finishLocation = next.getPlaceLocation();
+                    Location currentLocation = vex.getLocation();
+                    if (vex.getWorld() != finishLocation.getWorld())
+                        continue;
+
+                    if (currentLocation.getBlockY() + 2 < finishLocation.getBlockY()){
+                        crateIterator.remove();
+                        next.land();
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
     }
 
     private void loadRarities() {
@@ -546,11 +578,6 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         opening.setRefundable(!settings.isForce());
         opening.setSaveData(settings.isSaveData());
 
-        if (!this.plugin.getOpeningManager().startOpening(player, opening, settings.isSkipAnimation())) {
-            //this.plugin.getOpeningManager().stopOpening(player);
-            return false;
-        }
-
         if (!settings.isForce()) {
             // Take costs
             crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
@@ -566,6 +593,17 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
                 item.setAmount(item.getAmount() - 1);
             }
         }
+
+        // Spawn the crate
+
+        Location spawnLocation;
+        if (source.hasBlock())
+            spawnLocation = source.getBlock().getLocation();
+        else
+            spawnLocation = player.getLocation();
+
+        FallingCrate fallingCrate = new FallingCrate(plugin, player, crate, spawnLocation);
+        fallingCrates.add(fallingCrate);
 
         return true;
     }

@@ -90,6 +90,11 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         InteractType clickAction = Config.getCrateClickAction(clickType);
         if (clickAction == null) return;
 
+        // Block is set to the clicked block anyway (for placement location)
+        if (event.getClickedBlock() != null) {
+            block = event.getClickedBlock().getRelative(event.getBlockFace());
+        }
+
         this.crateManager.interactCrate(player, crate, clickAction, item, block);
     }
 

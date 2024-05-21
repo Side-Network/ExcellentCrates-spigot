@@ -251,6 +251,16 @@ public class EditorLang {
         .text("Click with empty cursor", "to create a reward", LIGHT_RED.enclose("without") + " physical item.")
         .build();
 
+    public static final LangItem REWARD_AMOUNT = builder(PREFIX + "Reward.Amount.Info")
+            .name("Reward Amount")
+            .text("Change how many", "rewards are given.")
+            .emptyLine()
+            .current("Min Amount", REWARD_MIN_AMOUNT)
+            .current("Max Amount", REWARD_MAX_AMOUNT)
+            .emptyLine()
+            .leftClick("change")
+            .build();
+
     public static final LangItem REWARD_SORT = builder(PREFIX + "Reward.Sort.Info")
         .name("Sort Rewards")
         .text("Automatically sorts rewards in", "specified order.")

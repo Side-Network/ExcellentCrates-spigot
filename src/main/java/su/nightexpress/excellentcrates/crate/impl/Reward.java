@@ -322,6 +322,39 @@ public class Reward implements Weighted, Placeholder {
         });
     }
 
+    public ItemStack getContent(Player player) {
+        UnaryOperator<String> papi = str -> Plugins.hasPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, str) : str;
+        UnaryOperator<String> inter = PlaceholderMap.fusion(this.getCrate().getPlaceholders(), this.getPlaceholders()).replacer();
+        UnaryOperator<String> forPlayer = Placeholders.forPlayer(player);
+        Function<String, String> combo = inter.andThen(forPlayer);
+
+        if (Config.CRATE_PLACEHOLDER_API_FOR_REWARDS.get()) {
+            combo = combo.andThen(papi);
+        }
+
+        Function<String, String> replacer = combo;
+
+        for (ItemStack item : getItems()) {
+            ItemStack give = new ItemStack(item);
+
+            ItemUtil.editMeta(give, meta -> {
+                if (meta.hasDisplayName()) {
+                    meta.setDisplayName(replacer.apply(meta.getDisplayName()));
+                }
+
+                List<String> loreHas = meta.getLore();
+                if (loreHas != null) {
+                    loreHas.replaceAll(replacer::apply);
+                    meta.setLore(loreHas);
+                }
+            });
+
+            return give;
+        }
+
+        return null;
+    }
+
     public void give(@NotNull Player player) {
         this.giveContent(player);
 

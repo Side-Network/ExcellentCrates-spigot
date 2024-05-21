@@ -103,6 +103,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final  String REWARD_PREVIEW_NAME  = "%reward_preview_name%";
     public static final  String REWARD_PREVIEW_LORE  = "%reward_preview_lore%";
     public static final  String REWARD_BROADCAST     = "%reward_broadcast%";
+    public static final  String REWARD_MIN_AMOUNT    = "%reward_min_amount%";
+    public static final  String REWARD_MAX_AMOUNT    = "%reward_max_amount%";
 
     public static final Function<LimitType, String> REWARD_WIN_LIMIT_ENABLED  = limitType -> "%reward_" + limitType.name().toLowerCase() + "_win_limit_enabled%";
     public static final Function<LimitType, String> REWARD_WIN_LIMIT_AMOUNT   = limitType -> "%reward_" + limitType.name().toLowerCase() + "_win_limit_amount%";
@@ -270,6 +272,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
 
                 return good(String.valueOf(crate.getPreviewConfig()));
             })
+            .add(REWARD_MIN_AMOUNT, () -> String.valueOf(crate.getMinRewardAmount()))
+            .add(REWARD_MAX_AMOUNT, () -> String.valueOf(crate.getMaxRewardAmount()))
             ;
     }
 

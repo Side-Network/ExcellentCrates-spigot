@@ -1,14 +1,17 @@
 package su.nightexpress.excellentcrates.crate.editor;
 
+import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.excellentcrates.CratesPlugin;
+import su.nightexpress.excellentcrates.Placeholders;
 import su.nightexpress.excellentcrates.config.EditorLang;
 import su.nightexpress.excellentcrates.config.Lang;
 import su.nightexpress.excellentcrates.crate.impl.Crate;
+import su.nightexpress.excellentcrates.crate.impl.CrateSource;
 import su.nightexpress.excellentcrates.crate.impl.Reward;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuViewer;
@@ -68,9 +71,45 @@ public class RewardListEditor extends EditorMenu<CratesPlugin, Crate> implements
             });
         });
 
+        this.addItem(Material.NAME_TAG, EditorLang.REWARD_AMOUNT, 45, (viewer, event, crate) -> {
+            this.handleInput(viewer, Lang.EDITOR_ENTER_REWARD_AMOUNT, (dialog, wrapper) -> {
+                String[] parts = wrapper.getTextRaw().split(" ");
+                if (parts.length < 2) {
+                    dialog.error(Lang.ERROR_INVALID_AMOUNT.getMessage());
+                    return false;
+                }
+
+                int min;
+                int max;
+                try {
+                    min = Integer.parseInt(parts[0]);
+                    max = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e) {
+                    dialog.error(Lang.ERROR_INVALID_AMOUNT.getMessage());
+                    return false;
+                }
+
+                if (max < 1 || max < min) {
+                    dialog.error(Lang.ERROR_INVALID_AMOUNT.getMessage());
+                    return false;
+                }
+
+                crate.setMinRewardAmount(min);
+                crate.setMaxRewardAmount(max);
+                this.saveRewards(viewer, crate, true);
+                return true;
+            });
+        });
+
         this.addItem(ItemUtil.getSkinHead(TEXTURE_LETTERS), EditorLang.REWARD_SORT, 47, (viewer, event, crate) -> {
             this.runNextTick(() -> this.plugin.getCrateManager().openRewardSortEditor(viewer.getPlayer(), crate));
         });
+
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+                Crate crate = this.getLink(viewer.getPlayer());
+                ItemReplacer.replace(item, Placeholders.forCrateAll(crate).replacer());
+            })
+        );
     }
 
     @Override
