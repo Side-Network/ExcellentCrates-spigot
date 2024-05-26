@@ -66,6 +66,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
     // Part of the falling crate logic taken from https://github.com/Artillex-Studios/AxEnvoys
     private final ConcurrentLinkedQueue<FallingCrate> fallingCrates = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<FallingCrate> spawnedCrates = new ConcurrentLinkedQueue<>();
 
     public CrateManager(@NotNull CratesPlugin plugin) {
         super(plugin);
@@ -107,32 +108,60 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         this.addListener(new CrateListener(this.plugin, this));
 
-        // Fallen crate timer
+        // Falling crate timer
 
         new BukkitRunnable() {
             @Override
             public void run() {
                 Iterator<FallingCrate> crateIterator = fallingCrates.iterator();
 
+                // Falling crates
+
                 while (crateIterator.hasNext()) {
                     FallingCrate next = crateIterator.next();
-                    Entity falling = next.getFalling();
                     Entity vex = next.getVex();
-                    if (falling == null || vex == null)
+                    if (vex == null)
                         continue;
+
+                    if (vex.isDead()) {
+                        crateIterator.remove();
+                        continue;
+                    }
 
                     Location finishLocation = next.getPlaceLocation();
                     Location currentLocation = vex.getLocation();
                     if (vex.getWorld() != finishLocation.getWorld())
                         continue;
 
-                    if (currentLocation.getBlockY() + 2 < finishLocation.getBlockY()){
+                    if (!currentLocation.getChunk().isLoaded()) {
+                        crateIterator.remove();
+                        continue;
+                    }
+
+                    if (currentLocation.getBlockY() + 1 < finishLocation.getBlockY()) {
                         crateIterator.remove();
                         next.land();
+                        spawnedCrates.add(next);
                     }
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Iterator<FallingCrate> crateIterator = spawnedCrates.iterator();
+
+                // Spawned crates
+
+                while (crateIterator.hasNext()) {
+                    FallingCrate next = crateIterator.next();
+
+                    if (!next.updateTimer())
+                        crateIterator.remove();
+                }
+            }
+        }.runTaskTimerAsynchronously(plugin, 0L, 20L);
     }
 
     private void loadRarities() {
@@ -672,5 +701,17 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         });
 
         Arrays.asList(EffectModel.values()).forEach(model -> model.getEffect().addStep());
+    }
+
+    public FallingCrate getSpawnedCrate(Location location) {
+        return spawnedCrates.stream()
+                .filter(crate -> crate.getPlaceLocation().equals(location))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void removeSpawnedCrate(FallingCrate fallingCrate) {
+        fallingCrates.remove(fallingCrate);
+        spawnedCrates.remove(fallingCrate);
     }
 }
