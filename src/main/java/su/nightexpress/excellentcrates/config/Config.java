@@ -131,6 +131,17 @@ public class Config {
         "Allowed click types: " + StringUtil.inlineEnum(ClickType.class, ", "),
         "Allowed crate actions: " + StringUtil.inlineEnum(InteractType.class, ", "));
 
+    public static final ConfigValue<Integer> CRATE_FALL_HEIGHT = ConfigValue.create("Crate.Falling.Height",
+            20,
+            "Defines the height (above ground) where the crate will spawn at");
+    public static final ConfigValue<Double> CRATE_FALL_SPEED = ConfigValue.create("Crate.Falling.Speed",
+            -0.5,
+            "Defines the falling speed, applied as a velocity (negative for down)");
+
+    public static final ConfigValue<Integer> CRATE_FALL_REMOVE_IN = ConfigValue.create("Crate.Falling.Remove_In",
+            10,
+            "Defines the timer (in seconds) until the fallen crate gets destroyed");
+
     public static final ConfigValue<DateTimeFormatter> LOGS_DATE_FORMAT = ConfigValue.create("Logs.DateFormat",
         (cfg, path, def) -> DateTimeFormatter.ofPattern(cfg.getString(path, "dd/MM/yyyy HH:mm:ss")),
         (cfg, path, formatter) -> cfg.set(path, "dd/MM/yyyy HH:mm:ss"),

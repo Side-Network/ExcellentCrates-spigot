@@ -1,18 +1,26 @@
 package su.nightexpress.excellentcrates.crate.impl;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.*;
 import org.bukkit.block.Barrel;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import su.nightexpress.excellentcrates.CratesPlugin;
+import su.nightexpress.excellentcrates.Placeholders;
 import su.nightexpress.excellentcrates.api.event.CrateObtainRewardEvent;
+import su.nightexpress.excellentcrates.config.Config;
+import su.nightexpress.excellentcrates.config.Lang;
 import su.nightexpress.excellentcrates.util.TextDisplayBuilder;
+import su.nightexpress.nightcore.util.Colorizer;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 import su.nightexpress.nightcore.util.random.Rnd;
+import su.nightexpress.nightcore.util.wrapper.UniParticle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +29,8 @@ import java.util.stream.IntStream;
 
 public class FallingCrate {
 
-    private static final int FALL_HEIGHT = 20;
-    private static final float FALL_SPEED = -0.5f;
-    private static final int REMOVE_IN = 5; // Seconds
-
     private final CratesPlugin plugin;
+    private final PlaceholderMap placeholderMap = Placeholders.forFallingCrate(this);
 
     private final Player player;
     private final Crate crate;
@@ -43,7 +48,10 @@ public class FallingCrate {
 
         plugin.runTask(task -> {
             Location spawnAt = placeLocation.clone();
-            spawnAt.add(0.5, FALL_HEIGHT, 0.5);
+            spawnAt.add(0.5, Config.CRATE_FALL_HEIGHT.get(), 0.5);
+
+            // Firework
+            placeLocation.getWorld().spawn(placeLocation.clone().add(0.5, 0.2, 0.5), Firework.class);
 
             // Vex
             vex = spawnAt.getWorld().spawn(spawnAt, Vex.class, ent -> {
@@ -60,8 +68,9 @@ public class FallingCrate {
             });
 
             // Falling block
-            Entity falling = spawnAt.getWorld().spawnFallingBlock(spawnAt, Material.BARREL.createBlockData());
+            FallingBlock falling = spawnAt.getWorld().spawnFallingBlock(spawnAt, Material.BARREL.createBlockData());
             falling.setPersistent(false);
+            falling.setCancelDrop(true);
             vex.addPassenger(falling);
 
             // "Parachute" (Item Display)
@@ -81,7 +90,7 @@ public class FallingCrate {
             });
             vex.addPassenger(parachute);
 
-            vex.setVelocity(new Vector(0, FALL_SPEED, 0));
+            vex.setVelocity(new Vector(0, Config.CRATE_FALL_SPEED.get(), 0));
         });
     }
 
@@ -91,6 +100,10 @@ public class FallingCrate {
 
     public Location getPlaceLocation() {
         return placeLocation;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public void land() {
@@ -117,13 +130,15 @@ public class FallingCrate {
             plugin.getPluginManager().callEvent(rewardEvent);
         }
 
-        spawnedAt = System.currentTimeMillis() + (1000 * REMOVE_IN);
-
         hologram = new TextDisplayBuilder(placeLocation.clone().add(0.5, 1.2, 0.5))
-                .setBillboard(Display.Billboard.CENTER)
-                .setText("Removing in " + REMOVE_IN)
+                .setBillboard(Display.Billboard.VERTICAL)
+                .setShadowed(true)
+                .setBackgroundColor(Color.fromARGB(0, 0, 0, 0))
+                .setText(getHologramText())
                 .build();
         hologram.setPersistent(false);
+
+        spawnedAt = System.currentTimeMillis() + (1000L * Config.CRATE_FALL_REMOVE_IN.get());
 
         playSoundNearby(Sound.BLOCK_RESPAWN_ANCHOR_CHARGE);
     }
@@ -145,12 +160,23 @@ public class FallingCrate {
             return false;
         }
 
-        hologram.setText("Removing in " + remainingSeconds);
+        hologram.setText(getHologramText());
 
         if (remainingSeconds <= 3)
             playSoundNearby(Sound.BLOCK_NOTE_BLOCK_BELL);
 
         return true;
+    }
+
+    public String getRemainingSeconds() {
+        if (spawnedAt == Long.MAX_VALUE)
+            return String.valueOf(Config.CRATE_FALL_REMOVE_IN.get());
+
+        return String.valueOf((int) ((spawnedAt - System.currentTimeMillis()) / 1000));
+    }
+
+    public String getCrateName() {
+        return crate.getName();
     }
 
     public void remove() {
@@ -160,6 +186,8 @@ public class FallingCrate {
                 placeLocation.getBlock().setType(Material.AIR);
                 hologram.remove();
                 playSoundNearby(Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR);
+                UniParticle particle = UniParticle.of(Particle.EXPLOSION_LARGE);
+                particle.play(placeLocation.clone().add(0.5, 0.5, 0.5), 0.3, 0, 3);
             }
         }.runTask(plugin);
     }
@@ -183,5 +211,13 @@ public class FallingCrate {
 
             oPlayer.playSound(placeLocation, sound, SoundCategory.BLOCKS, 0.5f, 1f);
         }
+    }
+
+    public String getHologramText() {
+        String str = Lang.FALLING_CRATE_HOLOGRAM.getString();
+        return Colorizer.apply(PlaceholderAPI.setPlaceholders(
+                player,
+                placeholderMap.replacer().apply(str)
+        ));
     }
 }

@@ -20,6 +20,7 @@ public class TextDisplayBuilder {
     private double scale = 1;
     private boolean rotateY = false;
     private Vector translation = null;
+    private boolean shadowed = false;
 
     public TextDisplayBuilder(Location location) {
         this.location = location;
@@ -70,6 +71,11 @@ public class TextDisplayBuilder {
         return this;
     }
 
+    public TextDisplayBuilder setShadowed(boolean shadowed) {
+        this.shadowed = shadowed;
+        return this;
+    }
+
     public TextDisplay build() {
         Location spawnLoc = location.clone();
         spawnLoc.getChunk().load();
@@ -85,6 +91,7 @@ public class TextDisplayBuilder {
             e.setLineWidth(lineWidth);
             e.setBillboard(billboard);
             e.setAlignment(alignment);
+            e.setShadowed(shadowed);
             if (bgColor != null)
                 e.setBackgroundColor(bgColor);
             if (scale != 1 || rotateY || translation != null) {

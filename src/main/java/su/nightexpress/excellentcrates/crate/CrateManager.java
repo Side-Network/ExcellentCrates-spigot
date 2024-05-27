@@ -521,9 +521,6 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
                 if (!this.openCrate(player, source, settings)) {
                     if (spent == 0) {
-                        if (block != null && crate.isPushbackEnabled()) {
-                            player.setVelocity(player.getEyeLocation().getDirection().setY(Config.CRATE_PUSHBACK_Y.get()).multiply(Config.CRATE_PUSHBACK_MULTIPLY.get()));
-                        }
                         return;
                     }
                     break;
@@ -631,6 +628,22 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         else
             spawnLocation = player.getLocation();
 
+        Location check = spawnLocation.clone();
+
+        // Check if there are any blocks above the place location
+        for (int i = spawnLocation.getBlockY() + 1; i < spawnLocation.getWorld().getMaxHeight(); i++) {
+            check.setY(i);
+            if (!check.getBlock().isEmpty()) {
+                Lang.CRATE_OPEN_ERROR_BLOCK_ABOVE.getMessage().replace(crate.replacePlaceholders()).send(player);
+                return false;
+            }
+        }
+
+        if (getFallingCrate(spawnLocation.getBlock().getLocation()) != null) {
+            Lang.CRATE_OPEN_ERROR_ALREADY.getMessage().replace(crate.replacePlaceholders()).send(player);
+            return false;
+        }
+
         FallingCrate fallingCrate = new FallingCrate(plugin, player, crate, spawnLocation);
         fallingCrates.add(fallingCrate);
 
@@ -706,6 +719,13 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
     public FallingCrate getSpawnedCrate(Location location) {
         return spawnedCrates.stream()
                 .filter(crate -> crate.getPlaceLocation().equals(location))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public FallingCrate getFallingCrate(Location placeLocation) {
+        return fallingCrates.stream()
+                .filter(crate -> crate.getPlaceLocation().equals(placeLocation))
                 .findFirst()
                 .orElse(null);
     }

@@ -235,6 +235,12 @@ public class Lang extends CoreLang {
         LIGHT_GRAY.enclose("You're already opening crate!")
     );
 
+    public static final LangText CRATE_OPEN_ERROR_BLOCK_ABOVE = LangText.of("Crate.Open.Error.BlockAbove",
+            OUTPUT.enclose(20, 80) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+            RED.enclose(BOLD.enclose("Whoops!")),
+            LIGHT_GRAY.enclose("Make sure to place the crate under clear sky!")
+    );
+
     public static final LangText CRATE_OPEN_REWARD_INFO = LangText.of("Crate.Open.Reward.Info",
         TAG_NO_PREFIX,
         LIGHT_GRAY.enclose("You won " + LIGHT_GREEN.enclose(REWARD_NAME) + " from the " + LIGHT_GREEN.enclose(CRATE_NAME) + "!"));
@@ -337,4 +343,8 @@ public class Lang extends CoreLang {
 
     public static final LangString EDITOR_ENTER_REWARD_AMOUNT = LangString.of("Editor.Reward.Enter.Amount",
             LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Min] [Max]")));
+
+    public static final LangString FALLING_CRATE_HOLOGRAM = LangString.of("Crate.Hologram.Base",
+            "Test Crate\nFor %player_name%\nRemoving in %seconds%"
+    );
 }

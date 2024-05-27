@@ -1,11 +1,13 @@
 package su.nightexpress.excellentcrates.crate.listener;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -69,6 +71,13 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         Block block = null;
         Crate crate = null;
 
+        // Check if trying to open a spawned crate
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && event.getClickedBlock().getType() == Material.BARREL) {
+            FallingCrate fallingCrate = crateManager.getSpawnedCrate(event.getClickedBlock().getLocation());
+            if (fallingCrate != null && fallingCrate.getPlayer().getUniqueId() != event.getPlayer().getUniqueId())
+                return;
+        }
+
         if (item != null && !item.getType().isAir()) {
             crate = this.crateManager.getCrateByItem(item);
         }
@@ -96,7 +105,8 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         // Block is set to the clicked block anyway (for placement location)
         if (event.getClickedBlock() != null) {
             block = event.getClickedBlock().getRelative(event.getBlockFace());
-        }
+        } else if (clickAction != InteractType.CRATE_PREVIEW)
+            return;
 
         this.crateManager.interactCrate(player, crate, clickAction, item, block);
     }
@@ -107,6 +117,16 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         if (this.crateManager.isCrate(item)) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onCrateBreak(BlockBreakEvent event) {
+        if (event.getBlock().getType() != Material.BARREL)
+            return;
+
+        FallingCrate fallingCrate = crateManager.getSpawnedCrate(event.getBlock().getLocation());
+        if (fallingCrate != null)
+            event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

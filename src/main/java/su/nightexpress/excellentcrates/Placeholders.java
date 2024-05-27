@@ -87,6 +87,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String KEY_VIRTUAL   = "%key_virtual%";
     public static final String KEY_ITEM_NAME = "%key_item_name%";
 
+    public static final String REMOVING_IN_SECONDS = "%seconds%";
+
     @Deprecated
     public static final String MENU_ID = "%menu_id%";
 
@@ -372,5 +374,13 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         return new PlaceholderMap()
             .add(Placeholders.CURRENCY_ID, currency::getId)
             .add(Placeholders.CURRENCY_NAME, currency::getName);
+    }
+
+    @NotNull
+    public static PlaceholderMap forFallingCrate(@NotNull FallingCrate fallingCrate) {
+        return new PlaceholderMap()
+                .add(REMOVING_IN_SECONDS, fallingCrate::getRemainingSeconds)
+                .add(CRATE_NAME, fallingCrate::getCrateName)
+                ;
     }
 }
