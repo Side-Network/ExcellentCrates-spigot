@@ -19,6 +19,12 @@ public class EditorCommand extends AbstractCommand<CratesPlugin> {
 
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+        Player player = (Player) sender;
+        if (!player.getWorld().getName().equalsIgnoreCase("spawn")) {
+            sender.sendMessage("You can edit crates only at spawn!");
+            return;
+        }
+
         this.plugin.getCrateManager().openEditor((Player) sender);
     }
 }

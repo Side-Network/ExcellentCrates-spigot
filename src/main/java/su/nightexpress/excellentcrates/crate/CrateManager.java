@@ -207,7 +207,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
     }
 
     private void loadCrates() {
-        for (File file : FileUtil.getFiles(plugin.getDataFolder() + Config.DIR_CRATES, false)) {
+        for (File file : FileUtil.getFiles(plugin.getDataFolder().toPath().resolve(Config.DIR_CRATES.get()).toString())) {
             Crate crate = new Crate(plugin, file);
             this.loadCrate(crate);
         }
@@ -433,7 +433,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
             return false;
         }
 
-        File file = new File(plugin.getDataFolder() + Config.DIR_CRATES, id + ".yml");
+        File file = plugin.getDataFolder().toPath().resolve(Config.DIR_CRATES.get()).resolve(id + ".yml").toFile();
         FileUtil.create(file);
 
         Crate crate = new Crate(this.plugin, file);

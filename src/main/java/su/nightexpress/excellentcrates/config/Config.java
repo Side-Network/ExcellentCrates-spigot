@@ -20,7 +20,8 @@ import static su.nightexpress.excellentcrates.Placeholders.*;
 
 public class Config {
 
-    public static final String DIR_CRATES   = "/crates/";
+    public static final ConfigValue<String> DIR_CRATES = ConfigValue.create("Database.Crates_Store_Dir",
+            "/crates/");
     public static final String DIR_PREVIEWS = "/previews/";
     public static final String DIR_KEYS     = "/keys/";
     public static final String DIR_MENUS    = "/menu/";

@@ -6,9 +6,9 @@ import org.bukkit.block.Barrel;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import su.nightexpress.excellentcrates.CratesPlugin;
@@ -35,8 +35,10 @@ public class FallingCrate {
     private final Player player;
     private final Crate crate;
     private final Location placeLocation;
+
     private Entity vex;
     private TextDisplay hologram = null;
+    private BukkitRunnable particleTask = null;
 
     private long spawnedAt = Long.MAX_VALUE;
 
@@ -50,8 +52,14 @@ public class FallingCrate {
             Location spawnAt = placeLocation.clone();
             spawnAt.add(0.5, Config.CRATE_FALL_HEIGHT.get(), 0.5);
 
-            // Firework
-            placeLocation.getWorld().spawn(placeLocation.clone().add(0.5, 0.2, 0.5), Firework.class);
+            final Location enderLocation = placeLocation.clone().add(0.5, 0, 0.5);
+            particleTask = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    enderLocation.getWorld().playEffect(enderLocation, Effect.ENDER_SIGNAL, 1);
+                }
+            };
+            particleTask.runTaskTimer(plugin, 0L, 10L);
 
             // Vex
             vex = spawnAt.getWorld().spawn(spawnAt, Vex.class, ent -> {
@@ -109,6 +117,7 @@ public class FallingCrate {
     public void land() {
         removePassengers(vex);
         vex.remove();
+        particleTask.cancel();
 
         placeLocation.getBlock().setType(Material.BARREL);
         Barrel barrel = (Barrel) placeLocation.getBlock().getState();
