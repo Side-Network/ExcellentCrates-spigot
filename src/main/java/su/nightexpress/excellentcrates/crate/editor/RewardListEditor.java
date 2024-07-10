@@ -38,7 +38,7 @@ public class RewardListEditor extends EditorMenu<CratesPlugin, Crate> implements
             this.runNextTick(() -> plugin.getCrateManager().openCrateEditor(viewer.getPlayer(), crate));
         });
         this.addNextPage(53);
-        this.addPreviousPage(45);
+        this.addPreviousPage(52);
 
         this.addCreation(EditorLang.REWARD_CREATE, 51, (viewer, event, crate) -> {
             ItemStack cursor = event.getCursor();
