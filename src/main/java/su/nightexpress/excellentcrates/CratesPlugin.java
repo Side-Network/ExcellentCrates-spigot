@@ -141,6 +141,7 @@ public class CratesPlugin extends NightDataPlugin<CrateUser> {
         baseCommand.addChildren(new OpenCommand(this));
         baseCommand.addChildren(new OpenForCommand(this));
         baseCommand.addChildren(new GiveCommand(this));
+        baseCommand.addChildren(new GiveAllCommand(this));
         baseCommand.addChildren(new KeyCommand(this));
         baseCommand.addChildren(new MenuCommand(this));
         baseCommand.addChildren(new PreviewCommand(this));

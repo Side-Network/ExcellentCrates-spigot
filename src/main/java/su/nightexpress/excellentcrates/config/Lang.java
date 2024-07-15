@@ -59,11 +59,20 @@ public class Lang extends CoreLang {
     public static final LangString COMMAND_GIVE_USAGE = LangString.of("Command.Give.Usage",
         "<player> <crate> [amount] [-s]");
 
+    public static final LangString COMMAND_GIVE_ALL_USAGE = LangString.of("Command.GiveAll.Usage",
+            "<crate> [amount] [-s]");
+
     public static final LangString COMMAND_GIVE_DESC = LangString.of("Command.Give.Desc",
         "Gives crate to a player.");
 
+    public static final LangString COMMAND_GIVE_ALL_DESC = LangString.of("Command.GiveAll.Desc",
+            "Gives crate to all player.");
+
     public static final LangText COMMAND_GIVE_DONE = LangText.of("Command.Give.Done",
         LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose("x" + GENERIC_AMOUNT) + " of " + LIGHT_YELLOW.enclose(CRATE_NAME) + " crate(s) to " + LIGHT_YELLOW.enclose(PLAYER_NAME) + "."));
+
+    public static final LangText COMMAND_GIVE_ALL_DONE = LangText.of("Command.GiveAll.Done",
+            LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose("x" + GENERIC_AMOUNT) + " of " + LIGHT_YELLOW.enclose(CRATE_NAME) + " crate(s) to all players."));
 
     public static final LangText COMMAND_GIVE_NOTIFY = LangText.of("Command.Give.Notify",
         LIGHT_GRAY.enclose("You recieved " + LIGHT_YELLOW.enclose("x" + GENERIC_AMOUNT) + " of " + LIGHT_YELLOW.enclose(CRATE_NAME) + "."));

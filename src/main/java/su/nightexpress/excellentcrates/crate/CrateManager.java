@@ -604,22 +604,6 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         opening.setRefundable(!settings.isForce());
         opening.setSaveData(settings.isSaveData());
 
-        if (!settings.isForce()) {
-            // Take costs
-            crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
-
-            // Take key
-            if (crate.isKeyRequired()) {
-                /*key = */this.plugin.getKeyManager().takeKey(player, crate);
-            }
-
-            // Take crate item stack
-            ItemStack item = source.getItem();
-            if (item != null) {
-                item.setAmount(item.getAmount() - 1);
-            }
-        }
-
         // Spawn the crate
 
         Location spawnLocation;
@@ -642,6 +626,22 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         if (getFallingCrate(spawnLocation.getBlock().getLocation()) != null) {
             Lang.CRATE_OPEN_ERROR_ALREADY.getMessage().replace(crate.replacePlaceholders()).send(player);
             return false;
+        }
+
+        if (!settings.isForce()) {
+            // Take costs
+            crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
+
+            // Take key
+            if (crate.isKeyRequired()) {
+                /*key = */this.plugin.getKeyManager().takeKey(player, crate);
+            }
+
+            // Take crate item stack
+            ItemStack item = source.getItem();
+            if (item != null) {
+                item.setAmount(item.getAmount() - 1);
+            }
         }
 
         FallingCrate fallingCrate = new FallingCrate(plugin, player, crate, spawnLocation);
