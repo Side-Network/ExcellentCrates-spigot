@@ -15,6 +15,7 @@ import su.nightexpress.excellentcrates.CratesPlugin;
 import su.nightexpress.excellentcrates.Placeholders;
 import su.nightexpress.excellentcrates.api.event.CrateFallenEvent;
 import su.nightexpress.excellentcrates.api.event.CrateObtainRewardEvent;
+import su.nightexpress.excellentcrates.api.event.CratePlacedEvent;
 import su.nightexpress.excellentcrates.config.Config;
 import su.nightexpress.excellentcrates.config.Lang;
 import su.nightexpress.excellentcrates.util.TextDisplayBuilder;
@@ -101,6 +102,9 @@ public class FallingCrate {
             vex.addPassenger(parachute);
 
             vex.setVelocity(new Vector(0, Config.CRATE_FALL_SPEED.get(), 0));
+
+            CratePlacedEvent placedEvent = new CratePlacedEvent(crate, placeLocation, player);
+            plugin.getPluginManager().callEvent(placedEvent);
         });
     }
 
