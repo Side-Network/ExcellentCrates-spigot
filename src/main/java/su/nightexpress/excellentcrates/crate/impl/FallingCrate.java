@@ -13,6 +13,7 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import su.nightexpress.excellentcrates.CratesPlugin;
 import su.nightexpress.excellentcrates.Placeholders;
+import su.nightexpress.excellentcrates.api.event.CrateFallenEvent;
 import su.nightexpress.excellentcrates.api.event.CrateObtainRewardEvent;
 import su.nightexpress.excellentcrates.config.Config;
 import su.nightexpress.excellentcrates.config.Lang;
@@ -57,9 +58,10 @@ public class FallingCrate {
                 @Override
                 public void run() {
                     enderLocation.getWorld().playEffect(enderLocation, Effect.ENDER_SIGNAL, 1);
+                    vex.setVelocity(new Vector(0, Config.CRATE_FALL_SPEED.get(), 0));
                 }
             };
-            particleTask.runTaskTimer(plugin, 0L, 10L);
+            particleTask.runTaskTimer(plugin, 10L, 10L);
 
             // Vex
             vex = spawnAt.getWorld().spawn(spawnAt, Vex.class, ent -> {
@@ -135,6 +137,8 @@ public class FallingCrate {
             ItemStack item = reward.getContent(player);
             barrel.getInventory().setItem(next, item);
 
+            this.plugin.getCrateLogger().logReward(player, reward);
+
             CrateObtainRewardEvent rewardEvent = new CrateObtainRewardEvent(reward, player);
             plugin.getPluginManager().callEvent(rewardEvent);
         }
@@ -150,6 +154,9 @@ public class FallingCrate {
         spawnedAt = System.currentTimeMillis() + (1000L * Config.CRATE_FALL_REMOVE_IN.get());
 
         playSoundNearby(Sound.BLOCK_RESPAWN_ANCHOR_CHARGE);
+
+        CrateFallenEvent fallenEvent = new CrateFallenEvent(crate, placeLocation, player);
+        plugin.getPluginManager().callEvent(fallenEvent);
     }
 
     private void removePassengers(Entity entity) {
