@@ -8,7 +8,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import su.nightexpress.excellentcrates.CratesPlugin;
@@ -62,7 +61,7 @@ public class FallingCrate {
                     vex.setVelocity(new Vector(0, Config.CRATE_FALL_SPEED.get(), 0));
                 }
             };
-            particleTask.runTaskTimer(plugin, 10L, 10L);
+            particleTask.runTaskTimer(plugin, 0L, 10L);
 
             // Vex
             vex = spawnAt.getWorld().spawn(spawnAt, Vex.class, ent -> {

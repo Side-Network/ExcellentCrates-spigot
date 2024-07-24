@@ -1,6 +1,16 @@
 package su.nightexpress.excellentcrates.crate.listener;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.bukkit.event.block.UseBlockEvent;
+import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import org.bukkit.Material;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -20,11 +30,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.excellentcrates.CratesPlugin;
-import su.nightexpress.excellentcrates.config.Config;
+import su.nightexpress.excellentcrates.config.Perms;
 import su.nightexpress.excellentcrates.crate.CrateManager;
 import su.nightexpress.excellentcrates.crate.impl.Crate;
 import su.nightexpress.excellentcrates.crate.impl.FallingCrate;
-import su.nightexpress.excellentcrates.util.ClickType;
 import su.nightexpress.excellentcrates.util.CrateUtils;
 import su.nightexpress.excellentcrates.util.InteractType;
 import su.nightexpress.nightcore.dialog.Dialog;
@@ -64,15 +73,69 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         Dialog.stop(player);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onCrateUse(PlayerInteractEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onWGUseBlock(UseBlockEvent event) {
+        for (Block block : event.getBlocks()) {
+            if (crateManager.getSpawnedCrate(block.getLocation()) != null) {
+                event.setAllowed(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCrateOpen(PlayerInteractEvent event) {
+        // Check if trying to open a spawned crate
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && event.getClickedBlock().getType() == Material.BARREL) {
+            FallingCrate fallingCrate = crateManager.getSpawnedCrate(event.getClickedBlock().getLocation());
+            if (fallingCrate != null) {
+                event.setCancelled(true);
+
+                if (fallingCrate.getPlayer().getUniqueId() != event.getPlayer().getUniqueId()
+                        && !event.getPlayer().hasPermission(Perms.BYPASS)) {
+                    return;
+                }
+
+                Barrel barrel = (Barrel) event.getClickedBlock().getState();
+                event.getPlayer().openInventory(barrel.getInventory());
+            }
+        }
+    }
+
+    /**
+     * This will be used only if a WorldGuard hasn't covered the place event
+     * (with PlayerInteractEvent below)
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItemInHand();
+        Block block = event.getBlock();
+        Crate crate = null;
+
+        if (!item.getType().isAir())
+            crate = this.crateManager.getCrateByItem(item);
+
+        if (crate == null)
+            return;
+
+        event.setCancelled(true);
+
+        this.crateManager.interactCrate(player, crate, InteractType.CRATE_OPEN, item, block);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlaceInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
         Block block = null;
         Crate crate = null;
 
         // Check if trying to open a spawned crate
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && event.getClickedBlock().getType() == Material.BARREL) {
+        if (event.hasBlock() && event.getClickedBlock().getType() == Material.BARREL) {
             FallingCrate fallingCrate = crateManager.getSpawnedCrate(event.getClickedBlock().getLocation());
             if (fallingCrate != null && fallingCrate.getPlayer().getUniqueId() != event.getPlayer().getUniqueId())
                 return;
@@ -81,42 +144,50 @@ public class CrateListener extends AbstractListener<CratesPlugin> {
         if (item != null && !item.getType().isAir()) {
             crate = this.crateManager.getCrateByItem(item);
         }
+
+        if (crate != null && event.getClickedBlock() != null) {
+            WorldGuardPlatform platform = WorldGuard.getInstance().getPlatform();
+            RegionQuery query = platform.getRegionContainer().createQuery();
+
+            // Check if can build - let PlaceBlockEvent handle if can WG build
+            Location wgLoc = BukkitAdapter.adapt(event.getClickedBlock().getLocation());
+            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+
+            if (query.testBuild(wgLoc, localPlayer))
+                return;
+
+            // Check if there is no region with an ID that starts with "ipasums-"
+            // If there is, cancel the placement
+            for (ProtectedRegion region : query.getApplicableRegions(wgLoc).getRegions()) {
+                if (region.getId().startsWith("ipasums-"))
+                    return;
+            }
+        }
+
         if (crate == null) {
             item = null;
             block = event.getClickedBlock();
-            if (block == null) return;
+            if (block == null)
+                return;
 
             crate = this.crateManager.getCrateByBlock(block);
         }
-        if (crate == null) {
+        if (crate == null)
             return;
-        }
 
         event.setUseItemInHand(Event.Result.DENY);
         event.setUseInteractedBlock(Event.Result.DENY);
 
-        if (event.getHand() != EquipmentSlot.HAND) return;
-
-        Action action = event.getAction();
-        ClickType clickType = ClickType.from(action, player.isSneaking());
-        InteractType clickAction = Config.getCrateClickAction(clickType);
-        if (clickAction == null) return;
-
-        // Block is set to the clicked block anyway (for placement location)
-        if (event.getClickedBlock() != null) {
-            block = event.getClickedBlock().getRelative(event.getBlockFace());
-        } else if (clickAction != InteractType.CRATE_PREVIEW)
+        if (event.getHand() != EquipmentSlot.HAND)
             return;
 
-        this.crateManager.interactCrate(player, crate, clickAction, item, block);
-    }
+        event.setCancelled(true);
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onCratePlace(BlockPlaceEvent event) {
-        ItemStack item = event.getItemInHand();
-        if (this.crateManager.isCrate(item)) {
-            event.setCancelled(true);
-        }
+        // Block is set to the clicked block anyway (for placement location)
+        if (event.getClickedBlock() != null)
+            block = event.getClickedBlock().getRelative(event.getBlockFace());
+
+        this.crateManager.interactCrate(player, crate, InteractType.CRATE_OPEN, item, block);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
