@@ -250,6 +250,12 @@ public class Lang extends CoreLang {
             LIGHT_GRAY.enclose("Make sure to place the crate under clear sky!")
     );
 
+    public static final LangText CRATE_OPEN_NO_PERMISSION = LangText.of("Crate.Open.Error.Permission",
+            OUTPUT.enclose(20, 80) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+            RED.enclose(BOLD.enclose("Whoops!")),
+            LIGHT_GRAY.enclose("You don't have permission to open this!")
+    );
+
     public static final LangText CRATE_OPEN_REWARD_INFO = LangText.of("Crate.Open.Reward.Info",
         TAG_NO_PREFIX,
         LIGHT_GRAY.enclose("You won " + LIGHT_GREEN.enclose(REWARD_NAME) + " from the " + LIGHT_GREEN.enclose(CRATE_NAME) + "!"));

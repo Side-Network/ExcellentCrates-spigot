@@ -543,7 +543,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         }
 
         if (!settings.isForce() && !crate.hasPermission(player)) {
-            Lang.ERROR_NO_PERMISSION.getMessage(plugin).send(player);
+            Lang.CRATE_OPEN_NO_PERMISSION.getMessage().send(player);
             return false;
         }
 

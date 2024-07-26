@@ -332,8 +332,6 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     }
 
     public boolean hasPermission(@NotNull Player player) {
-        if (!this.isPermissionRequired()) return true;
-
         return player.hasPermission(this.getPermission());
     }
 
@@ -446,7 +444,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     }
 
     public boolean isPermissionRequired() {
-        return isPermissionRequired;
+        return true;
     }
 
     public void setPermissionRequired(boolean isPermissionRequired) {
