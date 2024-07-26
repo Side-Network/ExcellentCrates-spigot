@@ -87,7 +87,7 @@ public class FallingCrate {
             ItemDisplay parachute = spawnAt.getWorld().spawn(spawnAt, ItemDisplay.class, ent -> {
                 ItemStack item = new ItemStack(Material.PAPER);
                 ItemMeta meta = item.getItemMeta();
-                meta.setCustomModelData(90001);
+                meta.setCustomModelData((int) crate.getHologramYOffset());
                 item.setItemMeta(meta);
                 ent.setItemStack(item);
 
