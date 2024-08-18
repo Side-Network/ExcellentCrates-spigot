@@ -614,6 +614,11 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         Location check = spawnLocation.clone();
 
+        if (!check.getBlock().isEmpty()) {
+            Lang.CRATE_OPEN_ERROR_SOLID_BLOCK.getMessage().replace(crate.replacePlaceholders()).send(player);
+            return false;
+        }
+
         // Check if there are any blocks above the place location
         for (int i = spawnLocation.getBlockY() + 1; i < spawnLocation.getWorld().getMaxHeight(); i++) {
             check.setY(i);

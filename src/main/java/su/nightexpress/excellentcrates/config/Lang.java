@@ -250,6 +250,12 @@ public class Lang extends CoreLang {
             LIGHT_GRAY.enclose("Make sure to place the crate under clear sky!")
     );
 
+    public static final LangText CRATE_OPEN_ERROR_SOLID_BLOCK = LangText.of("Crate.Open.Error.SolidBlock",
+            OUTPUT.enclose(20, 80) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+            RED.enclose(BOLD.enclose("Whoops!")),
+            LIGHT_GRAY.enclose("Make sure to place the crate on a solid block!")
+    );
+
     public static final LangText CRATE_OPEN_NO_PERMISSION = LangText.of("Crate.Open.Error.Permission",
             OUTPUT.enclose(20, 80) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
             RED.enclose(BOLD.enclose("Whoops!")),
