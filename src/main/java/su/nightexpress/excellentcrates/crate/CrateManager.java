@@ -2,8 +2,10 @@ package su.nightexpress.excellentcrates.crate;
 
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -614,9 +616,18 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         Location check = spawnLocation.clone();
 
-        if (!check.getBlock().isEmpty()) {
-            Lang.CRATE_OPEN_ERROR_SOLID_BLOCK.getMessage().replace(crate.replacePlaceholders()).send(player);
-            return false;
+        Material type = check.getBlock().getType();
+        if (!check.getBlock().isEmpty() || !type.isSolid()) {
+            if (type == Material.PLAYER_HEAD || type == Material.PLAYER_WALL_HEAD) {
+                Block bottom = check.getBlock().getRelative(BlockFace.DOWN);
+                if (!bottom.getType().isSolid()) {
+                    Lang.CRATE_OPEN_ERROR_SOLID_BLOCK.getMessage().replace(crate.replacePlaceholders()).send(player);
+                    return false;
+                }
+            } else {
+                Lang.CRATE_OPEN_ERROR_SOLID_BLOCK.getMessage().replace(crate.replacePlaceholders()).send(player);
+                return false;
+            }
         }
 
         // Check if there are any blocks above the place location
