@@ -618,7 +618,7 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
 
         Material type = check.getBlock().getType();
         if (!check.getBlock().isEmpty() || !type.isSolid()) {
-            if (type == Material.PLAYER_HEAD || type == Material.PLAYER_WALL_HEAD) {
+            if (type == Material.PLAYER_HEAD || type == Material.PLAYER_WALL_HEAD || type == Material.AIR) {
                 Block bottom = check.getBlock().getRelative(BlockFace.DOWN);
                 if (!bottom.getType().isSolid()) {
                     Lang.CRATE_OPEN_ERROR_SOLID_BLOCK.getMessage().replace(crate.replacePlaceholders()).send(player);
