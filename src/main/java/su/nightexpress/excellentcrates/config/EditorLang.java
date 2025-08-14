@@ -22,7 +22,7 @@ public class EditorLang {
         .click("navigate").build();
 
     public static final LangItem CRATE_OBJECT = builder(PREFIX + "Crate.Object")
-        .name(CRATE_NAME + RESET.enclose(LIGHT_GRAY.enclose(" (ID: " + WHITE.enclose(CRATE_ID) + ")")))
+        .name(CRATE_NAME)
         .textRaw(CRATE_INSPECT)
         .emptyLine()
         .leftClick("edit")
@@ -227,7 +227,7 @@ public class EditorLang {
         .build();
 
     public static final LangItem REWARD_OBJECT = builder(PREFIX + "Reward.Object")
-        .name(REWARD_NAME + RESET.enclose(LIGHT_GRAY.enclose(" (ID: " + LIGHT_ORANGE.enclose(REWARD_ID) + ")")))
+        .name(REWARD_NAME)
         .textRaw(REWARD_INSPECT_CONTENT)
         .emptyLine()
         .current("Weight", Placeholders.REWARD_WEIGHT)
@@ -422,7 +422,7 @@ public class EditorLang {
         .build();
 
     public static final LangItem KEY_OBJECT = builder(PREFIX + "Key.Object")
-        .name(KEY_NAME + RESET.enclose(LIGHT_GRAY.enclose(" (ID: " + WHITE.enclose(KEY_ID) + ")")))
+        .name(KEY_NAME)
         .current("Virtual", Placeholders.KEY_VIRTUAL)
         .emptyLine()
         .leftClick("to edit")

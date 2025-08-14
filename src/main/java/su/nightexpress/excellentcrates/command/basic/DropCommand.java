@@ -1,9 +1,11 @@
 package su.nightexpress.excellentcrates.command.basic;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.excellentcrates.CratesPlugin;
 import su.nightexpress.excellentcrates.Placeholders;
@@ -12,7 +14,6 @@ import su.nightexpress.excellentcrates.config.Perms;
 import su.nightexpress.excellentcrates.crate.impl.Crate;
 import su.nightexpress.nightcore.command.CommandResult;
 import su.nightexpress.nightcore.command.impl.AbstractCommand;
-import su.nightexpress.nightcore.util.Lists;
 
 import java.util.List;
 
@@ -50,7 +51,9 @@ public class DropCommand extends AbstractCommand<CratesPlugin> {
             }
         }
         if (arg == 5) {
-            return Lists.worldNames();
+            return Bukkit.getWorlds().stream()
+                    .map(WorldInfo::getName)
+                    .toList();
         }
         return super.getTab(player, arg, args);
     }

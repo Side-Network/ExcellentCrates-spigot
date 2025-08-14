@@ -5,6 +5,7 @@ import org.bukkit.Sound;
 import su.nightexpress.nightcore.core.CoreLang;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.language.entry.LangText;
+import su.nightexpress.nightcore.util.bridge.wrapper.ClickEventType;
 
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nightcore.language.tag.MessageTags.*;
@@ -277,7 +278,7 @@ public class Lang extends CoreLang {
         " ",
         "\n" + LIGHT_GRAY.enclose(" Player " + LIGHT_GREEN.enclose(PLAYER_DISPLAY_NAME) + " just won " + LIGHT_GREEN.enclose(REWARD_NAME) + " from " + LIGHT_GREEN.enclose(CRATE_NAME) + "!"),
         " ",
-        "\n" + LIGHT_GRAY.enclose("Do you wanna too? Purchase keys now: " + CLICK.enclose(ClickEvent.Action.OPEN_URL, LIGHT_GREEN.enclose("[OPEN STORE]"), "https://store.examplecraft.com/")),
+        "\n" + LIGHT_GRAY.enclose("Do you wanna too? Purchase keys now: " + CLICK.wrap(LIGHT_GREEN.enclose("[OPEN STORE]"), ClickEventType.OPEN_URL, "https://store.examplecraft.com/")),
         " "
     );
 
