@@ -132,11 +132,17 @@ public class FallingCrate {
                 .boxed()
                 .collect(Collectors.toList());
 
-        for (int i = 0; i < rewardAmount; i++) {
+        // Roll all rewards at once, respecting "single" rarity constraints
+        List<Reward> rewards = crate.rollRewards(player, rewardAmount);
+
+        for (Reward reward : rewards) {
+            if (possibleSlots.isEmpty()) {
+                break;
+            }
+
             int next = Rnd.get(possibleSlots);
             possibleSlots.remove((Object) next);
 
-            Reward reward = crate.rollReward(player);
             ItemStack item = reward.getContent(player);
             barrel.getInventory().setItem(next, item);
 

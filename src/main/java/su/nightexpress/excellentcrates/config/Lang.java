@@ -308,6 +308,9 @@ public class Lang extends CoreLang {
 
     public static final LangString OTHER_FREE = LangString.of("Other.Free", "Free");
 
+    public static final LangString OTHER_SINGLE_RARITY_CHANCE = LangString.of("Other.Single_Rarity_Chance",
+        LIGHT_ORANGE.enclose("Guaranteed"));
+
     public static final LangString EDITOR_TITLE_CRATES = LangString.of("Editor.Title.Crates", BLACK.enclose("Crates Editor"));
 
     public static final LangString EDITOR_TITLE_KEYS = LangString.of("Editor.Title.Keys", BLACK.enclose("Keys Editor"));

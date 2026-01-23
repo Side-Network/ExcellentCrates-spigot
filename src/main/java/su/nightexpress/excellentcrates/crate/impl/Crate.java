@@ -385,6 +385,11 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
     @NotNull
     public Reward rollReward(@Nullable Player player, @Nullable Rarity rarity) {
+        return this.rollReward(player, rarity, new HashSet<>());
+    }
+
+    @NotNull
+    public Reward rollReward(@Nullable Player player, @Nullable Rarity rarity, @NotNull Set<Rarity> excludedRarities) {
         List<Reward> rewards = this.getRewards(player, rarity);
 
         // If no rarity is specified, we have to select a random one and filter rewards by selected rarity.
@@ -394,6 +399,9 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
             rewards.stream().map(Reward::getRarity).forEach(rarity1 -> {
                 rarities.putIfAbsent(rarity1, rarity1.getWeight());
             });
+
+            // Remove excluded rarities from the pool
+            excludedRarities.forEach(rarities::remove);
 
             Rarity rarityRoll = Rnd.getByWeight(rarities);
             rewards.removeIf(reward -> reward.getRarity() != rarityRoll);
@@ -409,6 +417,53 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
             rewards.put(reward, reward.getWeight());
         });
         return Rnd.getByWeight(rewards);
+    }
+
+    /**
+     * Rolls multiple rewards for a player, respecting "single" rarity constraints.
+     * If a "single" rarity exists and has available rewards, one reward from it is rolled FIRST,
+     * then the remaining rewards are rolled with the "single" rarity excluded.
+     *
+     * @param player The player to roll rewards for
+     * @param amount The number of rewards to roll
+     * @return A list of rolled rewards
+     */
+    @NotNull
+    public List<Reward> rollRewards(@Nullable Player player, int amount) {
+        List<Reward> rolledRewards = new ArrayList<>();
+        Set<Rarity> excludedRarities = new HashSet<>();
+        int remainingAmount = amount;
+
+        // First, check if there's a "single" rarity and roll one item from it
+        Rarity singleRarity = this.plugin.getCrateManager().getRarity("single");
+        if (singleRarity != null && this.hasRewards(player, singleRarity) && remainingAmount > 0) {
+            Reward singleReward = this.rollReward(player, singleRarity);
+            rolledRewards.add(singleReward);
+            excludedRarities.add(singleRarity);
+            remainingAmount--;
+        }
+
+        // Roll the remaining rewards, excluding the "single" rarity
+        for (int i = 0; i < remainingAmount; i++) {
+            // Check if there are any rewards available
+            if (!this.hasRewards(player)) {
+                break;
+            }
+
+            // Get available rewards, excluding those from excluded rarities
+            List<Reward> availableRewards = this.getRewards(player, null);
+            availableRewards.removeIf(reward -> excludedRarities.contains(reward.getRarity()));
+
+            if (availableRewards.isEmpty()) {
+                break;
+            }
+
+            // Roll a reward with excluded rarities
+            Reward reward = this.rollReward(player, null, excludedRarities);
+            rolledRewards.add(reward);
+        }
+
+        return rolledRewards;
     }
 
     @NotNull

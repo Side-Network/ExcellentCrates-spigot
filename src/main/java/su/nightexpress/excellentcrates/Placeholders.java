@@ -290,7 +290,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(REWARD_ID, reward::getId)
             .add(REWARD_NAME, reward::getName)
             .add(REWARD_WEIGHT, () -> NumberUtil.format(reward.getWeight()))
-            .add(REWARD_ROLL_CHANCE, () -> NumberUtil.format(reward.getRollChance()))
+            .add(REWARD_ROLL_CHANCE, () -> {
+                if (reward.getRarity().getId().equalsIgnoreCase("single")) {
+                    return Lang.OTHER_SINGLE_RARITY_CHANCE.getString();
+                }
+                return NumberUtil.format(reward.getRollChance());
+            })
             .add(REWARD_CHANCE, () -> NumberUtil.format(reward.getWeight()))
             .add(REWARD_REAL_CHANCE, () -> NumberUtil.format(reward.getRollChance()))
             .add(REWARD_RARITY_NAME, () -> reward.getRarity().getName())
