@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.excellentcrates.CratesPlugin;
 import su.nightexpress.excellentcrates.api.event.CrateObtainRewardEvent;
+import su.nightexpress.excellentcrates.api.event.CrateRewardDeliveryEvent;
 import su.nightexpress.excellentcrates.config.Config;
 import su.nightexpress.excellentcrates.crate.impl.CrateSource;
 import su.nightexpress.excellentcrates.crate.impl.Reward;
@@ -68,13 +69,19 @@ public class BasicOpening extends AbstractOpening {
         this.setHasRewardAttempts(true);
 
         Reward reward = this.getCrate().rollReward(this.player);
-        reward.give(this.player);
-
-        CrateObtainRewardEvent rewardEvent = new CrateObtainRewardEvent(reward, player);
-        plugin.getPluginManager().callEvent(rewardEvent);
+        Player player = this.player;
+        Runnable delivery = () -> {
+            reward.give(player);
+            plugin.getPluginManager().callEvent(new CrateObtainRewardEvent(reward, player));
+        };
+        CrateRewardDeliveryEvent deliveryEvent = new CrateRewardDeliveryEvent(reward, player, delivery);
+        plugin.getPluginManager().callEvent(deliveryEvent);
+        // A listener that took the delivery over shows the reward itself, and gives it when its show gets there.
+        boolean deferred = deliveryEvent.isDeferred();
+        if (!deferred) delivery.run();
 
         Block block = this.getSource().getBlock();
-        if (this.visuals && Config.CRATE_DISPLAY_REWARD_ABOVE_BLOCK.get() && block != null) {
+        if (this.visuals && !deferred && Config.CRATE_DISPLAY_REWARD_ABOVE_BLOCK.get() && block != null) {
             if (block.getState() instanceof Lidded lidded) {
                 lidded.open();
                 addContainerSchedule(block, 3);
