@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.excellentcrates.CratesPlugin;
 import su.nightexpress.excellentcrates.api.opening.Opening;
 import su.nightexpress.excellentcrates.opening.inventory.InventoryOpening;
-import su.nightexpress.nightcore.api.event.PlayerOpenMenuEvent;
+import su.nightexpress.nightcore.event.PlayerOpenMenuEvent;
 import su.nightexpress.nightcore.manager.AbstractListener;
 
 public class OpeningListener extends AbstractListener<CratesPlugin> {
