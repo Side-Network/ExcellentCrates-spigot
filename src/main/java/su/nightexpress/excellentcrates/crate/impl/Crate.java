@@ -47,6 +47,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
     private String      openingConfig;
     private String      previewConfig;
     private boolean     isPermissionRequired;
+    private boolean     fallingEnabled = true;
     private int         openCooldown;
     private boolean     keyRequired;
     private ItemStack   item;
@@ -94,6 +95,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
         this.setOpeningConfig(config.getString("Animation_Config"));
         this.setPreviewConfig(config.getString("Preview_Config"));
         this.setPermissionRequired(config.getBoolean("Permission_Required"));
+        this.setFallingEnabled(config.getBoolean("Falling.Enabled", true));
 
         this.setOpenCooldown(config.getInt("Opening.Cooldown"));
 
@@ -165,6 +167,7 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
         config.set("Animation_Config", this.getOpeningConfig());
         config.set("Preview_Config", this.getPreviewConfig());
         config.set("Permission_Required", this.isPermissionRequired());
+        config.set("Falling.Enabled", this.isFallingEnabled());
 
         config.set("Opening.Cooldown", this.getOpenCooldown());
         config.remove("Opening.Cost");
@@ -496,6 +499,18 @@ public class Crate extends AbstractFileData<CratesPlugin> implements Placeholder
 
     public void setPreviewConfig(@Nullable String previewConfig) {
         this.previewConfig = previewConfig == null ? null : previewConfig.toLowerCase();
+    }
+
+    /**
+     * Whether opening this crate drops it from the sky as a barrel holding the rewards. When false it opens
+     * the plain way: no drop, and the rewards go straight to the player.
+     */
+    public boolean isFallingEnabled() {
+        return fallingEnabled;
+    }
+
+    public void setFallingEnabled(boolean fallingEnabled) {
+        this.fallingEnabled = fallingEnabled;
     }
 
     public boolean isPermissionRequired() {

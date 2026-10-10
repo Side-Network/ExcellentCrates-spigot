@@ -606,6 +606,15 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
         opening.setRefundable(!settings.isForce());
         opening.setSaveData(settings.isSaveData());
 
+        // A crate that does not fall opens the plain way: its opening runs and gives the rewards itself.
+        if (!crate.isFallingEnabled()) {
+            if (!this.plugin.getOpeningManager().startOpening(player, opening, settings.isSkipAnimation())) {
+                return false;
+            }
+            this.takeOpenCosts(player, source, settings);
+            return true;
+        }
+
         // Spawn the crate
 
         Location spawnLocation;
@@ -644,26 +653,32 @@ public class CrateManager extends AbstractManager<CratesPlugin> {
             return false;
         }
 
-        if (!settings.isForce()) {
-            // Take costs
-            crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
-
-            // Take key
-            if (crate.isKeyRequired()) {
-                /*key = */this.plugin.getKeyManager().takeKey(player, crate);
-            }
-
-            // Take crate item stack
-            ItemStack item = source.getItem();
-            if (item != null) {
-                item.setAmount(item.getAmount() - 1);
-            }
-        }
+        this.takeOpenCosts(player, source, settings);
 
         FallingCrate fallingCrate = new FallingCrate(plugin, player, crate, spawnLocation);
         fallingCrates.add(fallingCrate);
 
         return true;
+    }
+
+    private void takeOpenCosts(@NotNull Player player, @NotNull CrateSource source, @NotNull OpenSettings settings) {
+        if (settings.isForce()) return;
+
+        Crate crate = source.getCrate();
+
+        // Take costs
+        crate.getOpenCostMap().forEach((currency, amount) -> currency.getHandler().take(player, amount));
+
+        // Take key
+        if (crate.isKeyRequired()) {
+            /*key = */this.plugin.getKeyManager().takeKey(player, crate);
+        }
+
+        // Take crate item stack
+        ItemStack item = source.getItem();
+        if (item != null) {
+            item.setAmount(item.getAmount() - 1);
+        }
     }
 
     public void addOpenings(@NotNull Player player, @NotNull Crate crate, int amount) {
